@@ -1,3 +1,7 @@
+/*
+Class which implements showing the list of devices on UI
+*/
+
 package com.dratek.dragonmanu.dragontooth;
 
 import android.app.Activity;
@@ -9,9 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import java.util.List;
-
 
 public class DeviceListAdapter extends ArrayAdapter<DeviceItem> {
 
@@ -24,60 +26,54 @@ public class DeviceListAdapter extends ArrayAdapter<DeviceItem> {
         this.context = context;
     }
 
-    /**
-     * Holder for the list items.
-     */
     private class ViewHolder{
         TextView titleText;
     }
 
-    /**
-     *
-     * @param position
-     * @param convertView
-     * @param parent
-     * @return
-     */
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder = null;
         View line = null;
         DeviceItem item = (DeviceItem)getItem(position);
-        final String name = item.getDeviceName();
+        //final String name = item.getDeviceName();
         TextView macAddress = null;
         TextView rssi = null;
+        TextView message = null;
         View viewToUse = null;
 
         // This block exists to inflate the settings list item conditionally based on whether
         // we want to support a grid or list view.
-        LayoutInflater mInflater = (LayoutInflater) context
-                .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
 
         viewToUse = mInflater.inflate(R.layout.device_list_item, null);
         holder = new ViewHolder();
         holder.titleText = (TextView)viewToUse.findViewById(R.id.titleTextView);
         viewToUse.setTag(holder);
 
+        //linking objects to UI elements
         macAddress = (TextView)viewToUse.findViewById(R.id.macAddress);
         rssi = (TextView)viewToUse.findViewById(R.id.rssi_value);
+        message = (TextView)viewToUse.findViewById(R.id.message);
         line = (View)viewToUse.findViewById(R.id.line);
+
+        //Setting up the values to be displayed
         holder.titleText.setText(item.getDeviceName());
         macAddress.setText(item.getAddress());
         rssi.setText(String.valueOf(item.getrssi()));
+        message.setText(MainActivity.message);
 
-        if(item.getDeviceName()!=null)
-        if ( item.getDeviceName().toString() == "No Devices") {
-            macAddress.setVisibility(View.INVISIBLE);
-            rssi.setVisibility(View.INVISIBLE);
-            line.setVisibility(View.INVISIBLE);
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
-                    ((int) RelativeLayout.LayoutParams.WRAP_CONTENT, (int) RelativeLayout.LayoutParams.WRAP_CONTENT);
-            params.addRule(RelativeLayout.CENTER_VERTICAL);
-            params.addRule(RelativeLayout.CENTER_HORIZONTAL);
-            holder.titleText.setLayoutParams(params);
+        //If no devices found, we make UI invisible
+        if(item.getDeviceName()!=null){
+            if ( item.getDeviceName().toString() == "No Devices") {
+                macAddress.setVisibility(View.INVISIBLE);
+                rssi.setVisibility(View.INVISIBLE);
+                line.setVisibility(View.INVISIBLE);
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
+                        ((int) RelativeLayout.LayoutParams.WRAP_CONTENT, (int) RelativeLayout.LayoutParams.WRAP_CONTENT);
+                params.addRule(RelativeLayout.CENTER_VERTICAL);
+                params.addRule(RelativeLayout.CENTER_HORIZONTAL);
+                holder.titleText.setLayoutParams(params);
+            }
         }
-
         return viewToUse;
     }
-
-
 }

@@ -1,5 +1,9 @@
-package com.dratek.dragonmanu.dragontooth;
+/*
+Class for the Device item
+*/
 
+
+package com.dratek.dragonmanu.dragontooth;
 
 import android.bluetooth.BluetoothDevice;
 
@@ -23,9 +27,13 @@ public class DeviceItem {
         return connected;
     }
 
-    public int getrssi() {return rssi; }
+    public int getrssi() {
+        return rssi;
+    }
 
-    public void setrssi(int set) {rssi = set; }
+    public void setrssi(int set) {
+        rssi = set;
+    }
 
     public String getAddress() {
         return address;
