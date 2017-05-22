@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
@@ -39,7 +40,7 @@ public class MainActivity extends ActionBarActivity implements DeviceListFragmen
     private BluetoothGatt mGatt;
     private BluetoothLeScanner mLEScanner;
     private ScanSettings settings;
-
+    static boolean connected=false;
     public static int REQUEST_BLUETOOTH = 1;
 
     @Override
@@ -94,9 +95,15 @@ public class MainActivity extends ActionBarActivity implements DeviceListFragmen
     }
 
     public void connectToDevice(BluetoothDevice device) {
-        if (mGatt == null) {
+        if (!connected) {
             mGatt = device.connectGatt(this, false, gattCallback);
+            connected = true;
             DeviceListFragment.ischecked = false; // will stop after first device detection
+        }else{
+            mGatt.disconnect();
+            connected = false;
+            Log.d("DEVICELIST", "removing");
+            DeviceListFragment.ischecked = false; // will start after disconnect
         }
     }
 
@@ -122,8 +129,17 @@ public class MainActivity extends ActionBarActivity implements DeviceListFragmen
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             List<BluetoothGattService> services = gatt.getServices();
             Log.i("onServicesDiscovered", services.toString());
-            gatt.readCharacteristic(services.get(1).getCharacteristics().get
-                    (0));
+            //services.get(1).notify();
+            //gatt.writeCharacteristic(services.get(3).getCharacteristics().get(0));
+            Log.i("onServicesDiscovered", services.get(3).getCharacteristics().get(0).getUuid().toString());
+            BluetoothGattCharacteristic commandChar = services.get(3).getCharacteristics().get(0);
+            String data = "hello dear";
+            byte[] bytearray = data.getBytes();
+            commandChar.setValue(bytearray);
+            gatt.writeCharacteristic(commandChar);
+            //gatt.readDescriptor(ccc);
+            //BluetoothGattDescriptor clientConfig = services.get(3).getCharacteristics().get(0).getDescriptor(CCC);
+            //clientConfig.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
         }
 
         @Override
@@ -131,12 +147,30 @@ public class MainActivity extends ActionBarActivity implements DeviceListFragmen
                                          BluetoothGattCharacteristic
                                                  characteristic, int status) {
             Log.i("onCharacteristicRead", characteristic.toString());
-            if (status == BluetoothGatt.GATT_SUCCESS) {
+            if (characteristic.getValue()!= null && characteristic.getValue().length >0) {
                 //displayCharacteristic(characteristic);
-                Log.d("DEVICELIST", "reading"+ new String(characteristic.getValue()));
+                Log.d("DEVICELIST", "reading"+ new String(characteristic.getValue())+ characteristic.getValue().length);
             }
             //gatt.disconnect();
         }
+        @Override
+        public void onCharacteristicChanged(BluetoothGatt gatt,
+                                            BluetoothGattCharacteristic characteristic) {
+            Log.i("onCharacteristicChange", characteristic.toString());
+            if (characteristic.getValue()!= null && characteristic.getValue().length >0) {
+                //displayCharacteristic(characteristic);
+                Log.d("DEVICELIST", "reading"+ new String(characteristic.getValue()));
+            }
+        }
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            if(status != BluetoothGatt.GATT_SUCCESS){
+                Log.d("onCharacteristicWrite", "Failed write, retrying");
+                gatt.writeCharacteristic(characteristic);
+            }
+            Log.d("onCharacteristicWrite", new String(characteristic.getValue()));
+            super.onCharacteristicWrite(gatt, characteristic, status);
+        }
+
 
 
 

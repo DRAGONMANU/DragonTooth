@@ -64,6 +64,7 @@ public class DeviceListAdapter extends ArrayAdapter<DeviceItem> {
         macAddress.setText(item.getAddress());
         rssi.setText(String.valueOf(item.getrssi()));
 
+        if(item.getDeviceName()!=null)
         if ( item.getDeviceName().toString() == "No Devices") {
             macAddress.setVisibility(View.INVISIBLE);
             rssi.setVisibility(View.INVISIBLE);
